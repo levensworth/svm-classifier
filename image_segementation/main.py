@@ -35,10 +35,10 @@ def load_data(base_path):
                 img = image.imread(os.path.join(base_path, lable, img))
                 for row in img:
                     for col in row:
-                        data.append(col)
+                        data.append([col])
                         lables.append(lable)
 
-    unique_lables = np.unique(np.array(lables))
+    unique_lables = ['cow', 'grass', 'sky']
     categorical_lables = [i for i in unique_lables]
     lables = [categorical_lables.index(lable) for lable in lables]
     lables = np.array(lables)

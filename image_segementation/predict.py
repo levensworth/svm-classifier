@@ -2,8 +2,14 @@ import pickle
 from matplotlib import image
 import numpy as np
 
-model_path = 'model_1.pkl'
-img_path = 'total.jpg'
+model_path = 'model_poly.pkl'
+img_path = 'data/complete.jpg'
+
+class_color = [
+    [255, 0,0],
+    [0, 255, 0],
+    [0, 0, 255]
+]
 
 # load model
 with open(model_path, 'rb') as f:
@@ -12,10 +18,14 @@ with open(model_path, 'rb') as f:
 
 img = image.imread(img_path)
 
-data = []
+predictions = []
 for row in img:
+    row_pred = []
     for col in row:
-        data.append(col)
-data = np.array(data)
+        pred = model.predict(np.array([col]))
+        row_pred.append(class_color[int(pred)])
+    predictions.append(row_pred)
 
-predictions = model.predict(data)
+predictions = np.array(predictions)
+predictions = predictions.astype('uint8')
+image.imsave('output.jpg', predictions)

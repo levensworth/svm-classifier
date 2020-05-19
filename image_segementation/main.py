@@ -35,7 +35,7 @@ def load_data(base_path):
                 img = image.imread(os.path.join(base_path, lable, img))
                 for row in img:
                     for col in row:
-                        data.append([col])
+                        data.append(col)
                         lables.append(lable)
 
     unique_lables = ['cow', 'grass', 'sky']
@@ -54,6 +54,7 @@ train_data, test_data, train_lables, test_lables = train_test_split(data, lables
 
 # kernel possiblities = linear, poly, rbf, sigmoid, precomputed
 model = SVC(C=0.8, kernel='rbf')
+
 model.fit(train_data, train_lables)
 
 # save model

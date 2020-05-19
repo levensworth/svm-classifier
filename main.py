@@ -56,6 +56,7 @@ def find_perceptron_plane(h):
 
     x1 = [i[0] for i in x]
     x2 = [i[1] for i in x]
+    plt.figure(figsize=(5,5))
     plt.scatter(x1, x2, c=y)
     points = model.show_decision_boundary(0, 5)
     p_x = [i[0] for i in points]

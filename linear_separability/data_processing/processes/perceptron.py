@@ -13,7 +13,7 @@ class Perceptron(Classifier):
         self.epochs = kwargs['epochs']
         self.max_error = kwargs['error']
         self.learning_rate = kwargs['learning_rate']
-        self.enahnce_decision = kwargs.get('enahnce', False)
+        self.enahnce_decision = kwargs.get('enahnce', True)
 
     def train(self, data, lables):
         # add treashold
@@ -53,6 +53,9 @@ class Perceptron(Classifier):
         self.logger.info('Achieved error = {}'.format(min_error))
         print('Achieved error = {}'.format(min_error))
         self.weights = min_weights
+        slope, y_origin = self.get_decision_equation()
+
+        self.boundary  = (slope, y_origin)
 
         if self.enahnce_decision:
             boundary = self._enhance(self.weights, data, lables)
@@ -60,7 +63,7 @@ class Perceptron(Classifier):
             # remember a line can be informed in infinite number of vectores
             # Ax + By + C = 0 => -m X + 1y - b = 0
             self.weights = np.array([-boundary[0], 1, -boundary[1]])
-
+            self.boundary = boundary
 
     def _enhance(self, weights, data, lables):
         '''
@@ -114,34 +117,38 @@ class Perceptron(Classifier):
         - b
         - error: the abs sum of the distance from each point to the line
         '''
-        another_class_point = points.pop()
+        another_class_point = points.pop(0)
+        # claculate a margin
         slope, b = self._find_linear_interpolation(points.copy())
 
-        # now we move the line by changing the y(0) value
+        #  now we calculate the orthogonal line
+        slope_p = -1/ slope
+        b_p = another_class_point[1] - slope_p * another_class_point[0]
 
-        # fisrt calculate the distance between the another_point and the line
-        # then bring that distance to half
-        line_x = (another_class_point[1] - b) / slope
-        horizontal_vertex = abs(another_class_point[0] - line_x)
+        # intersect with the other point
+        x = (b_p - b) / (slope - slope_p)
+        y = slope * x + b
 
-        line_y = slope * another_class_point[0] + b
-        vertical_vertex = abs(another_class_point[1] - line_y)
-        disntance = math.sqrt(horizontal_vertex ** 2 + vertical_vertex ** 2)
+        another_point_projection = np.array([x, y])
 
-        b += disntance/2.0 if another_class_point[1] < (slope * another_class_point[0] + b) else -disntance/2.0
+        # now we calculate the middle distance to both margins
+        middle_distance = np.linalg.norm(another_class_point[:-1] - another_point_projection) / 2
+
+        b += middle_distance if another_class_point[1] > (slope * another_class_point[0] + b) else - middle_distance
 
         points.append(another_class_point)
-        error = self._calculate_boundary_error(points, slope, b)
+        # error = self._calculate_boundary_error(points, slope, b)
+        error = 1/middle_distance if middle_distance != 0 else 10000000
         return slope, b, error
 
     def _find_linear_interpolation(self, points):
         '''
         Given 2 points returns the slope and the y(0)
         '''
-        point_a = points.pop()
-        point_b = points.pop()
+        point_a = points.pop(0)
+        point_b = points.pop(0)
         #  slope = Ay / Ax
-        slope = (point_a[1] - point_b[1]) / (point_a[0] - point_b[0])
+        slope = (point_b[1] - point_a[1]) / (point_b[0] - point_a[0])
         # b = y - mx
         b = point_a[1] - slope * point_a[0]
         return slope, b
@@ -230,14 +237,16 @@ class Perceptron(Classifier):
         Returns:
         - list of 2-d tuples
         '''
-        # m = -(b / w2) / (b / w1)
-        print(self.weights[2])
-        print(self.weights[0])
-        slope = - (self.weights[2] / self.weights[1]) / \
-            (self.weights[2] / self.weights[0])
-        origin_y = - self.weights[2] / self.weights[1]
-        # y = (-(b / w2) / (b / w1)) x + (-b / w2)
+        # # m = -(b / w2) / (b / w1)
+        # print(self.weights[2])
+        # print(self.weights[0])
+        # slope = - (self.weights[2] / self.weights[1]) / \
+        #     (self.weights[2] / self.weights[0])
+        # origin_y = - self.weights[2] / self.weights[1]
+        # # y = (-(b / w2) / (b / w1)) x + (-b / w2)
 
+        slope = self.boundary[0]
+        origin_y = self.boundary[1]
         points = []
         for i in range(start, end):
             points.append((i, slope * i + origin_y))

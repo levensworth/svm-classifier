@@ -5,7 +5,7 @@ class SVMClassifier(Classifier):
     def __init__(self, logger, **kwargs):
         super().__init__(logger, **kwargs)
         C = kwargs.get('c', 0.1)
-        self.model = SVC(C=C, kernel='linear')
+        self.model = SVC(C=C, kernel=kwargs.get('kernel', 'linear'))
 
     def train(self, data, labels):
         self.model = self.model.fit(data, labels)

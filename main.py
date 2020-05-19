@@ -11,12 +11,7 @@ from mlxtend.plotting import plot_decision_regions
 
 
 
-def show_SVM(h):
-
-    sources = h.list_injectors()
-    x = sources.pop()
-    data = h.get_set(x)
-
+def show_SVM(data, processor_conf):
 
     x = np.array(data[0])
     y = np.array(data[1])
@@ -24,7 +19,7 @@ def show_SVM(h):
     y = y.reshape((len(y), 1))
 
     p = Processor(logging)
-    p.load_sources(settings_processor.SOURCES)
+    p.load_sources(processor_conf)
 
     models = p.list_injectors()
     model = models.pop()
@@ -35,17 +30,14 @@ def show_SVM(h):
     plot_decision_regions(x, y1, clf=model.model, legend=2)
     plt.show()
 
-def find_perceptron_plane(h):
-    sources = h.list_injectors()
-    x = sources.pop()
-    data = h.get_set(x)
+def find_perceptron_plane(data, processor_conf):
 
     x = np.array(data[0])
     y = np.array(data[1])
     y = y.reshape((len(y), 1))
 
     p = Processor(logging)
-    p.load_sources(settings_processor.SOURCES)
+    p.load_sources(processor_conf)
 
     models = p.list_injectors()
     model = models.pop()
@@ -66,11 +58,47 @@ def find_perceptron_plane(h):
     return model.get_decision_equation()
 
 
+# punto A
+h = Handler(logging)
+h.load_sources([ {'path': 'big_separation', 'config': {'lower_limit': 0.0, 'upper_limit': 5.0, 'size': 100}}])
+sources = h.list_injectors()
+x = sources.pop()
+data_big = h.get_set(x)
 
 h = Handler(logging)
-h.load_sources(settings_handler.SOURCES)
+h.load_sources([ {'path': 'small_separation', 'config': {'lower_limit': 0.0, 'upper_limit': 5.0, 'size': 100}}])
+sources = h.list_injectors()
+x = sources.pop()
+data_small = h.get_set(x)
 
-find_perceptron_plane(h)
+find_perceptron_plane(data_big, [{'path': 'perceptron', 'config': {'epochs': 1000, 'error': 0.0, 'learning_rate': 0.1 ,'enhance': False}}])
+
+# punto B
+# h = Handler(logging)
+# h.load_sources([ {'path': 'big_separation', 'config': {'lower_limit': 0.0, 'upper_limit': 5.0, 'size': 100}}])
+# {'path': 'small_separation', 'config': {'lower_limit': 0.0, 'upper_limit': 5.0, 'size': 100}}
+find_perceptron_plane(data_big, [{'path': 'perceptron', 'config': {'epochs': 1000, 'error': 0.0, 'learning_rate': 0.1 ,'enhance': True}}])
+
+
+# Punto C
+
+# {'path': 'small_separation', 'config': {'lower_limit': 0.0, 'upper_limit': 5.0, 'size': 100}}
+find_perceptron_plane(data_small, [{'path': 'perceptron', 'config': {'epochs': 1000, 'error': 0.0, 'learning_rate': 0.1 ,'enhance': True}}])
+
+# Punto D a
+# h = Handler(logging)
+# h.load_sources([ {'path': 'big_separation', 'config': {'lower_limit': 0.0, 'upper_limit': 5.0, 'size': 100}}])
+# {'path': 'small_separation', 'config': {'lower_limit': 0.0, 'upper_limit': 5.0, 'size': 100}}
+# possible kernels: 'linear', 'poly', 'rbf', 'sigmoid', 'precomputed'
+show_SVM(data_big, [{'path': 'svm_classifier', 'config': {'c': 1, 'kernel': 'linear'}}])
+
+# D b
+# h = Handler(logging)
+# h.load_sources([ {'path': 'small_separation', 'config': {'lower_limit': 0.0, 'upper_limit': 5.0, 'size': 100}}])
+# {'path': 'small_separation', 'config': {'lower_limit': 0.0, 'upper_limit': 5.0, 'size': 100}}
+# possible kernels: 'linear', 'poly', 'rbf', 'sigmoid', 'precomputed'
+show_SVM(data_small, [{'path': 'svm_classifier', 'config': {'c': 1, 'kernel': 'linear'}}])
+
 
 '''
 

@@ -11,14 +11,20 @@ class SmallSeparation(DataSource):
     def get_data(self):
         x_arr = []
         label_arr = []
-
+        middle = (self.upper_limit - self.lower_limit)/2
         for x in np.arange(self.lower_limit, self.upper_limit, (self.upper_limit - self.lower_limit)/self.size):
-            middle = (self.upper_limit - self.lower_limit)/2
+
             label_arr.append(1 if x > middle else -1)
             # x = random.uniform(self.lower_limit, self.upper_limit)
             y = self._implicit_function(x)
             x_arr.append((x, y))
 
+        # add incorrect points
+        label_arr.append(-1)
+        x_arr.append((middle - 0.1, middle -0.2))
+
+        label_arr.append(1)
+        x_arr.append((middle + 0.1, middle + 0.1))
 
         return x_arr, label_arr
 

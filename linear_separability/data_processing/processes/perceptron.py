@@ -13,7 +13,7 @@ class Perceptron(Classifier):
         self.epochs = kwargs['epochs']
         self.max_error = kwargs['error']
         self.learning_rate = kwargs['learning_rate']
-        self.enahnce_decision = kwargs.get('enahnce', True)
+        self.enahnce_decision = kwargs.get('enhance', True)
 
     def train(self, data, lables):
         # add treashold
@@ -59,6 +59,8 @@ class Perceptron(Classifier):
 
         if self.enahnce_decision:
             boundary = self._enhance(self.weights, data, lables)
+            if math.isnan(boundary[1]):
+                print('here')
             # now we get the weight vector as a general form of the line's equation
             # remember a line can be informed in infinite number of vectores
             # Ax + By + C = 0 => -m X + 1y - b = 0
@@ -125,13 +127,23 @@ class Perceptron(Classifier):
         # claculate a margin
         slope, b = self._find_linear_interpolation(points.copy())
 
-        #  now we calculate the orthogonal line
-        slope_p = -1/ slope
-        b_p = another_class_point[1] - slope_p * another_class_point[0]
+        if slope == 0:
+            # horizontal line
+            x = another_class_point[0]
+            y = b
+        elif abs(slope) == math.inf:
+            # vertical line
+            x = points[0][0]
+            y = another_class_point[1]
 
-        # intersect with the other point
-        x = (b_p - b) / (slope - slope_p)
-        y = slope * x + b
+        if slope != 0:
+            #  now we calculate the orthogonal line
+            slope_p = -1/ slope
+            b_p = another_class_point[1] - slope_p * another_class_point[0]
+
+            # intersect with the other point
+            x = (b_p - b) / (slope - slope_p)
+            y = slope * x + b
 
         another_point_projection = np.array([x, y])
 
@@ -139,6 +151,8 @@ class Perceptron(Classifier):
         middle_distance = np.linalg.norm(another_class_point[:-1] - another_point_projection) / 2
 
         b += middle_distance if another_class_point[1] > (slope * another_class_point[0] + b) else - middle_distance
+        if math.isnan(b):
+            print('here')
 
         points.append(another_class_point)
         # error = self._calculate_boundary_error(points, slope, b)
@@ -155,6 +169,8 @@ class Perceptron(Classifier):
         slope = (point_b[1] - point_a[1]) / (point_b[0] - point_a[0])
         # b = y - mx
         b = point_a[1] - slope * point_a[0]
+        if math.isnan(b):
+            print('here')
         return slope, b
 
     def _calculate_boundary_error(self, points, slope, b):

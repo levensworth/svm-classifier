@@ -62,7 +62,11 @@ class Perceptron(Classifier):
             # now we get the weight vector as a general form of the line's equation
             # remember a line can be informed in infinite number of vectores
             # Ax + By + C = 0 => -m X + 1y - b = 0
-            self.weights = np.array([-boundary[0], 1, -boundary[1]])
+            self.weights = -1 * np.array([-boundary[0], 1, -boundary[1]])
+            # why the -1?
+            # remember that this perceptron contains the coordinate for an
+            # orthogonal vector to the boundary plane. There are 2 possible directions for the
+            # vector, as we know the distribution for the our data, i know the real vector direction
             self.boundary = boundary
 
     def _enhance(self, weights, data, lables):
@@ -138,7 +142,7 @@ class Perceptron(Classifier):
 
         points.append(another_class_point)
         # error = self._calculate_boundary_error(points, slope, b)
-        error = 1/middle_distance if middle_distance != 0 else 10000000
+        error = 1/middle_distance if middle_distance != 0 else math.inf
         return slope, b, error
 
     def _find_linear_interpolation(self, points):

@@ -32,8 +32,8 @@ class SmallSeparation(DataSource):
         '''
 
         middle = abs(self.upper_limit - self.lower_limit) / 2
-        low = self.lower_limit  if x > middle else (middle + 0.1)
-        high = self.upper_limit if x <= middle else (middle  - 0.1)
+        low = self.lower_limit  if x > middle else (middle - 0.1)
+        high = self.upper_limit if x <= middle else (middle  + 0.1)
         possible = [i for i in np.arange(low, high, 0.1)]
 
         return random.choice(possible)

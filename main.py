@@ -9,32 +9,31 @@ import linear_separability.data_processing.settings as settings_processor
 from mlxtend.plotting import plot_decision_regions
 
 
-h = Handler(logging)
-h.load_sources(settings_handler.SOURCES)
 
 
-sources = h.list_injectors()
-x = sources.pop()
-data = h.get_set(x)
-source = settings_processor.SOURCES[0]['config']
-# c = SVMClassifier(logging, **source)
+def show_SVM(h):
 
-x = np.array(data[0])
-y = np.array(data[1])
-y1 = y
-y = y.reshape((len(y), 1))
+    sources = h.list_injectors()
+    x = sources.pop()
+    data = h.get_set(x)
 
-p = Processor(logging)
-p.load_sources(settings_processor.SOURCES)
 
-models = p.list_injectors()
-model = models.pop()
-p.train_injector(model, x, y)
-y_hat = p.predict(model, x)
-print(y - y_hat)
+    x = np.array(data[0])
+    y = np.array(data[1])
+    y1 = y
+    y = y.reshape((len(y), 1))
 
-plot_decision_regions(x, y1, clf=model.model, legend=2)
-plt.show()
+    p = Processor(logging)
+    p.load_sources(settings_processor.SOURCES)
+
+    models = p.list_injectors()
+    model = models.pop()
+    p.train_injector(model, x, y)
+    y_hat = p.predict(model, x)
+    print(y - y_hat)
+
+    plot_decision_regions(x, y1, clf=model.model, legend=2)
+    plt.show()
 
 def find_perceptron_plane(h):
     sources = h.list_injectors()
@@ -52,6 +51,7 @@ def find_perceptron_plane(h):
     model = models.pop()
     p.train_injector(model, x, y)
     y_hat = p.predict(model, x)
+    y_hat = y_hat.reshape(y_hat.size, 1)
     print(y - y_hat)
 
     x1 = [i[0] for i in x]
@@ -65,6 +65,11 @@ def find_perceptron_plane(h):
     return model.get_decision_equation()
 
 
+
+h = Handler(logging)
+h.load_sources(settings_handler.SOURCES)
+
+find_perceptron_plane(h)
 
 '''
 
